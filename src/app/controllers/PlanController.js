@@ -1,18 +1,18 @@
 import * as Yup from 'yup';
-import EnrollPlan from '../models/EnrollPlan';
+import Plan from '../models/Plan';
 
-class EnrollPlanController {
+class PlanController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const enrollPlans = await EnrollPlan.findAll({
+    const plans = await Plan.findAll({
       order: ['updated_at'],
       attributes: ['id', 'title', 'duration', 'price'],
       limite: 20,
       offset: (page - 1) * 20,
     });
 
-    return res.json(enrollPlans);
+    return res.json(plans);
   }
 
   async store(req, res) {
@@ -25,7 +25,7 @@ class EnrollPlanController {
     if (!(await schema.isValid(req.body)))
       return res.status(400).json({ error: 'Validation fails' });
 
-    const { id, title, duration, price } = await EnrollPlan.create(req.body);
+    const { id, title, duration, price } = await Plan.create(req.body);
 
     return res.json({
       id,
@@ -48,9 +48,9 @@ class EnrollPlanController {
 
     const { id } = req.body;
 
-    const enrollPlan = await EnrollPlan.findByPk(id);
+    const enrollPlan = await Plan.findByPk(id);
 
-    const existEnrollPlan = await EnrollPlan.findOne({
+    const existEnrollPlan = await Plan.findOne({
       where: { id },
     });
     if (!existEnrollPlan)
@@ -70,8 +70,12 @@ class EnrollPlanController {
    * Criar requisição de DELETE
    */
   async delete(req, res) {
-    return res.json();
+    const enrollPlan = await Plan.findByPk(req.params.id);
+
+    enrollPlan.destroy();
+
+    return res.json({ success: 'The Plan was deleted' });
   }
 }
 
-export default new EnrollPlanController();
+export default new PlanController();
