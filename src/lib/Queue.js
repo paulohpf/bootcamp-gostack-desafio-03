@@ -1,8 +1,9 @@
 import Bee from 'bee-queue';
 import EnrollStudentMail from '../app/jobs/EnrollStudentMail';
+import AnswerHelpOrder from '../app/jobs/AnswerHelpOrder';
 import redisConfig from '../config/redis';
 
-const jobs = [EnrollStudentMail];
+const jobs = [EnrollStudentMail, AnswerHelpOrder];
 
 class Queue {
   constructor() {

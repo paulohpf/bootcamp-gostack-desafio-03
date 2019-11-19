@@ -7,7 +7,6 @@ class EnrollStudentMail {
 
   async handle({ data }) {
     const { enroll } = data;
-    console.log(enroll);
 
     await Mail.sendMail({
       to: `${enroll.student.name} <${enroll.student.email}>`,
