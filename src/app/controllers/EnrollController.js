@@ -31,7 +31,7 @@ class EnrollController {
         {
           model: Plan,
           as: 'plan',
-          attributes: ['id', 'title', 'duration', 'price'],
+          attributes: ['id', 'title', 'duration', 'price', 'active'],
         },
       ],
     });

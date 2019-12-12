@@ -1,7 +1,23 @@
+import { Op } from 'sequelize';
 import * as Yup from 'yup';
 import User from '../models/User';
 
 class UserController {
+  async index(req, res) {
+    const { q = '' } = req.query;
+
+    const users = await User.findAll({
+      where: {
+        name: {
+          [Op.iLike]: `%${q}%`,
+        },
+      },
+      attributes: ['id', 'name', 'email'],
+    });
+
+    return res.json(users);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string().required(),

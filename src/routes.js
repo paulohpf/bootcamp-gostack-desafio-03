@@ -12,7 +12,6 @@ import authMiddleware from './app/middlewares/auth';
 
 const routes = new Router();
 
-routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 routes.get('/students/:id/checkins', CheckinController.index);
@@ -22,6 +21,9 @@ routes.get('/students/:id/help-orders', HelpOrderController.index);
 routes.post('/students/:id/help-orders', HelpOrderController.store);
 
 routes.use(authMiddleware);
+
+routes.get('/users', UserController.index);
+routes.post('/users', UserController.store);
 
 routes.post('/students', StudentController.store);
 routes.put('/students', StudentController.update);
