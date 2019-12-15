@@ -14,7 +14,7 @@ class EnrollController {
     const { page = 1 } = req.query;
 
     const enroll = await Enroll.findAll({
-      attributes: ['id', 'start_date', 'end_date', 'price'],
+      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       where: {
         start_date: { [Op.not]: null },
         end_date: { [Op.not]: null },
@@ -31,7 +31,7 @@ class EnrollController {
         {
           model: Plan,
           as: 'plan',
-          attributes: ['id', 'title', 'duration', 'price', 'active'],
+          attributes: ['id', 'title', 'duration', 'price'],
         },
       ],
     });

@@ -8,6 +8,37 @@ import AnswerHelpOrder from '../jobs/AnswerHelpOrder';
 
 class HelpOrderController {
   async index(req, res) {
+    const { page = 1 } = req.query;
+
+    const helpOrders = await HelpOrder.findAll({
+      attributes: ['id', 'question', 'answer', 'answer_at'],
+      order: ['created_at'],
+      limit: 20,
+      offset: (page - 1) * 20,
+      include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
+    });
+
+    return res.json(helpOrders);
+  }
+
+  async indexNotAnsewerd(req, res) {
+    const { page = 1 } = req.query;
+
+    const helpOrders = await HelpOrder.findAll({
+      where: {
+        answer: null,
+      },
+      attributes: ['id', 'question', 'answer', 'answer_at'],
+      order: ['created_at'],
+      limit: 20,
+      offset: (page - 1) * 20,
+      include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
+    });
+
+    return res.json(helpOrders);
+  }
+
+  async indexById(req, res) {
     const scheme = Yup.object().shape({
       id: Yup.number().required(),
     });
