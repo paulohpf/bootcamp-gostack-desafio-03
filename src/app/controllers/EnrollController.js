@@ -61,7 +61,7 @@ class EnrollController {
     if (!plan) return res.status(400).json({ error: 'Plan does not exists' });
 
     // Set de EndDate
-    const startDate = startOfDay(parseISO(start_date));
+    const startDate = startOfDay(new Date(start_date));
     const endDate = endOfDay(addMonths(startDate, plan.duration));
 
     const enroll = await Enroll.create({
