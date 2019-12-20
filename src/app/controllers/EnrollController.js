@@ -39,6 +39,21 @@ class EnrollController {
     return res.json(enroll);
   }
 
+  async getById(req, res) {
+    const schema = Yup.object().shape({
+      id: Yup.number().required(),
+    });
+
+    if (!(await schema.isValid(req.params)))
+      return res.status(400).json({ error: 'Validation fails' });
+
+    const { id } = req.params;
+
+    const enroll = await Enroll.findByPk(id);
+
+    return res.json(enroll);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       student_id: Yup.number().required(),
@@ -129,7 +144,7 @@ class EnrollController {
       },
     });
 
-    const startDate = startOfDay(parseISO(start_date));
+    const startDate = startOfDay(new Date(start_date));
     const endDate = endOfDay(addMonths(startDate, plan.duration));
 
     const enrollUpdated = await enroll.update({
