@@ -1,5 +1,11 @@
 import * as Yup from 'yup';
-import { parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
+import {
+  addMonths,
+  startOfDay,
+  endOfDay,
+  isWithinInterval,
+  isBefore,
+} from 'date-fns';
 import { Op } from 'sequelize';
 
 import Enroll from '../models/Enroll';
@@ -31,7 +37,7 @@ class EnrollController {
         {
           model: Plan,
           as: 'plan',
-          attributes: ['id', 'title', 'duration', 'price'],
+          attributes: ['id', 'title'],
         },
       ],
     });
@@ -49,7 +55,19 @@ class EnrollController {
 
     const { id } = req.params;
 
-    const enroll = await Enroll.findByPk(id);
+    const enroll = await Enroll.findByPk(id, {
+      attributes: [
+        'id',
+        'student_id',
+        'plan_id',
+        'start_date',
+        'end_date',
+        'price',
+      ],
+    });
+
+    if (!enroll)
+      return res.status(400).json({ error: 'Enroll does not exists' });
 
     return res.json(enroll);
   }
@@ -66,28 +84,58 @@ class EnrollController {
 
     const { student_id, plan_id, start_date } = req.body;
 
+    // Verify retroactive date
+    if (isBefore(startOfDay(new Date(start_date)), startOfDay(new Date())))
+      return res
+        .status(400)
+        .json({ error: 'the start date cannot be before the current date' });
+
+    // Verify existence of current registrations
+    const currentEnroll = await Enroll.findOne({
+      where: { student_id },
+      attributes: ['id', 'start_date', 'end_date'],
+      order: [['createdAt', 'ASC']],
+      limit: 1,
+    });
+
+    if (currentEnroll) {
+      if (
+        isWithinInterval(new Date(), {
+          start: new Date(currentEnroll.start_date),
+          end: new Date(currentEnroll.end_date),
+        })
+      )
+        return res
+          .status(400)
+          .json({ error: 'The student is currently enrolled' });
+    }
+
     // Find plan
-    const plan = await Plan.findOne({
-      where: { id: plan_id },
+    const plan = await Plan.findByPk(plan_id, {
       attributes: ['title', 'duration', 'price'],
     });
 
     // Check if Plans exists
     if (!plan) return res.status(400).json({ error: 'Plan does not exists' });
 
+    const { duration } = plan;
+
     // Set de EndDate
     const startDate = startOfDay(new Date(start_date));
-    const endDate = endOfDay(addMonths(startDate, plan.duration));
+    const endDate = endOfDay(addMonths(startDate, duration));
+
+    // SetTotalPrice
+    const totalPrice = plan.duration * plan.price;
 
     const enroll = await Enroll.create({
       student_id,
       plan_id,
       start_date: startDate,
       end_date: endDate,
-      price: plan.price,
+      price: totalPrice,
     }).then(async response => {
       const newEnroll = await Enroll.findByPk(response.id, {
-        attributes: ['id', 'start_date', 'end_date'],
+        attributes: ['id', 'student_id', 'plan_id', 'start_date', 'end_date'],
         include: [
           {
             model: Student,
@@ -100,7 +148,7 @@ class EnrollController {
           {
             model: Plan,
             as: 'plan',
-            attributes: ['title', 'duration', 'price'],
+            attributes: ['title'],
             where: {
               id: plan_id,
             },
@@ -118,6 +166,7 @@ class EnrollController {
     return res.json(enroll);
   }
 
+  // No update não fiz validação de data retroativa, pois pensei em alguma possibilidade de correção
   async update(req, res) {
     const schema = Yup.object().shape({
       id: Yup.number().required(),
