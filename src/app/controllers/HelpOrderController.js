@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
-import { format } from 'date-fns';
+import { format, isWithinInterval } from 'date-fns';
 
+import Enroll from '../models/Enroll';
 import Student from '../models/Student';
 import HelpOrder from '../models/HelpOrder';
 import Queue from '../../lib/Queue';
@@ -74,8 +75,26 @@ class HelpOrderController {
 
     const studentExists = await Student.findByPk(id);
 
+    // Verify if User Exists
     if (!studentExists)
       return res.status(400).json({ error: 'Student does not exists' });
+
+    const currentEnroll = await Enroll.findOne({
+      where: { student_id: id },
+      attributes: ['id', 'start_date', 'end_date'],
+      order: [['createdAt', 'ASC']],
+      limit: 1,
+    });
+
+    // Verify if User Enrolled
+    if (
+      !isWithinInterval(new Date(), {
+        start: new Date(currentEnroll.start_date),
+        end: new Date(currentEnroll.end_date),
+      })
+    ) {
+      return res.status(400).json({ error: 'User is not enrolled' });
+    }
 
     const { question } = req.body;
 
@@ -84,7 +103,7 @@ class HelpOrderController {
       question,
     }).then(async response => {
       const newHelpOrder = await HelpOrder.findByPk(response.id, {
-        attributes: ['id', 'question', 'answer'],
+        attributes: ['id', 'question'],
         include: [
           {
             model: Student,
