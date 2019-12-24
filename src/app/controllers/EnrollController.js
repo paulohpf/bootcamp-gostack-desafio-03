@@ -19,15 +19,15 @@ class EnrollController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const enroll = await Enroll.findAll({
+    const { count, rows: enroll } = await Enroll.findAndCountAll({
       attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       where: {
         start_date: { [Op.not]: null },
         end_date: { [Op.not]: null },
       },
       order: ['created_at'],
-      limit: 20,
-      offset: (page - 1) * 20,
+      limit: 10,
+      offset: (page - 1) * 10,
       include: [
         {
           model: Student,
@@ -42,7 +42,11 @@ class EnrollController {
       ],
     });
 
-    return res.json(enroll);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10),
+      rows: enroll,
+    });
   }
 
   async getById(req, res) {

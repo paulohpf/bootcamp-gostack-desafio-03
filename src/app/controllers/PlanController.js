@@ -5,14 +5,18 @@ class PlanController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const plans = await Plan.findAll({
+    const { count, rows: plans } = await Plan.findAndCountAll({
       order: ['updated_at'],
       attributes: ['id', 'title', 'duration', 'price'],
-      limite: 20,
-      offset: (page - 1) * 20,
+      limit: 10,
+      offset: (page - 1) * 10,
     });
 
-    return res.json(plans);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: plans,
+    });
   }
 
   async getById(req, res) {

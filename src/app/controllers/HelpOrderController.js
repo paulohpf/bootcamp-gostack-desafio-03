@@ -11,21 +11,25 @@ class HelpOrderController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const helpOrders = await HelpOrder.findAll({
+    const { count, rows: helpOrders } = await HelpOrder.findAndCountAll({
       attributes: ['id', 'question', 'answer', 'answer_at'],
       order: ['created_at'],
-      limit: 20,
-      offset: (page - 1) * 20,
+      limit: 10,
+      offset: (page - 1) * 10,
       include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
     });
 
-    return res.json(helpOrders);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: helpOrders,
+    });
   }
 
   async indexNotAnsewerd(req, res) {
     const { page = 1 } = req.query;
 
-    const helpOrders = await HelpOrder.findAll({
+    const { count, rows: helpOrders } = await HelpOrder.findAndCountAll({
       where: {
         answer: null,
       },
@@ -36,7 +40,11 @@ class HelpOrderController {
       include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
     });
 
-    return res.json(helpOrders);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: helpOrders,
+    });
   }
 
   async indexById(req, res) {
@@ -156,8 +164,6 @@ class HelpOrderController {
         },
       ],
     });
-
-    console.log(helpOrder.student.name);
 
     helpOrder.answer = answer;
     helpOrder.answer_at = format(currentDate, "yyyy-MM-dd'T'HH:mm:ssxxx");

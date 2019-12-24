@@ -4,18 +4,25 @@ import User from '../models/User';
 
 class UserController {
   async index(req, res) {
-    const { q = '' } = req.query;
+    const { page = 1, searchText = '' } = req.query;
 
-    const users = await User.findAll({
+    const { count, rows: users } = await User.findAndCountAll({
       where: {
         name: {
-          [Op.iLike]: `%${q}%`,
+          [Op.iLike]: `%${searchText}%`,
         },
       },
       attributes: ['id', 'name', 'email'],
+      limit: 10,
+      offset: (page - 1) * 20,
     });
 
-    return res.json(users);
+    return res.json({
+      searchText,
+      offset: (page - 1) * 20,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: users,
+    });
   }
 
   async store(req, res) {

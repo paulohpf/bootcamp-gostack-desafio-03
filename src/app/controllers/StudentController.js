@@ -6,17 +6,22 @@ class StudentController {
   async index(req, res) {
     const { page = 1, searchText = '' } = req.query;
 
-    const students = await Student.findAll({
+    const { count, rows: students } = await Student.findAndCountAll({
       attributes: ['id', 'name', 'email', 'age'],
       where: {
         name: { [Op.iLike]: `%${searchText}%` },
       },
       order: ['name'],
-      limit: 20,
-      offset: (page - 1) * 20,
+      offset: (page - 1) * 10,
+      limit: 10,
     });
 
-    return res.json(students);
+    return res.json({
+      searchText,
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: students,
+    });
   }
 
   async getById(req, res) {
