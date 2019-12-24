@@ -25,9 +25,9 @@ routes.get('/users', UserController.index);
 routes.post('/users', UserController.store);
 
 routes.get('/students', StudentController.index);
+routes.get('/student/:id', StudentController.getById);
 routes.post('/students', StudentController.store);
 routes.put('/students', StudentController.update);
-routes.get('/student/:id', StudentController.getById);
 
 routes.get('/plans', PlanController.index);
 routes.get('/plan/:id', PlanController.getById);
@@ -45,6 +45,7 @@ routes.get('/help-orders', HelpOrderController.index);
 routes.get('/help-orders/notanswered', HelpOrderController.indexNotAnsewerd);
 routes.get('/students/:id/help-orders', HelpOrderController.indexById);
 
-routes.put('/help-orders/:id/answer', HelpOrderController.update);
+routes.get('/help-orders/:id', HelpOrderController.singleOrder);
+routes.put('/help-orders/:id', HelpOrderController.update);
 
 export default routes;
