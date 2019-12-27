@@ -16,6 +16,7 @@ class EnrollController {
 
     const { id } = req.params;
     const { page = 1 } = req.query;
+
     const checkins = await Checkin.findAll({
       where: {
         student_id: id,
