@@ -57,18 +57,23 @@ class HelpOrderController {
 
     const { id } = req.params;
     const { page = 1 } = req.query;
-    const helpOrders = await HelpOrder.findAll({
+
+    const { count, rows: helpOrders } = await HelpOrder.findAndCountAll({
       where: {
         student_id: id,
       },
       attributes: ['id', 'question', 'answer', 'answer_at'],
       order: ['created_at'],
-      limit: 20,
-      offset: (page - 1) * 20,
+      limit: 10,
+      offset: (page - 1) * 10,
       include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
     });
 
-    return res.json(helpOrders);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: helpOrders,
+    });
   }
 
   async singleOrder(req, res) {
@@ -108,6 +113,11 @@ class HelpOrderController {
       order: [['createdAt', 'ASC']],
       limit: 1,
     });
+
+    console.log(currentEnroll);
+
+    if (!currentEnroll)
+      return res.status(400).json({ error: 'User is not enrolled' });
 
     // Verify if User Enrolled
     if (

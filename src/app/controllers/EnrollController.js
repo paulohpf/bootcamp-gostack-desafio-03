@@ -158,41 +158,36 @@ class EnrollController {
     // SetTotalPrice
     const totalPrice = plan.duration * plan.price;
 
-    // const enroll = await Enroll.create({
-    //   student_id,
-    //   plan_id,
-    //   start_date: startDate,
-    //   end_date: endDate,
-    //   price: totalPrice,
-    // }).then(async response => {
-    //   const newEnroll = await Enroll.findByPk(response.id, {
-    //     attributes: ['id', 'student_id', 'plan_id', 'start_date', 'end_date'],
-    //     include: [
-    //       {
-    //         model: Student,
-    //         as: 'student',
-    //         attributes: ['name', 'email'],
-    //         where: {
-    //           id: student_id,
-    //         },
-    //       },
-    //       {
-    //         model: Plan,
-    //         as: 'plan',
-    //         attributes: ['title'],
-    //         where: {
-    //           id: plan_id,
-    //         },
-    //       },
-    //     ],
-    //   });
-
     const enroll = await Enroll.create({
       student_id,
       plan_id,
       start_date: startDate,
       end_date: endDate,
       price: totalPrice,
+    }).then(async response => {
+      const newEnroll = await Enroll.findByPk(response.id, {
+        attributes: ['id', 'student_id', 'plan_id', 'start_date', 'end_date'],
+        include: [
+          {
+            model: Student,
+            as: 'student',
+            attributes: ['name', 'email'],
+            where: {
+              id: student_id,
+            },
+          },
+          {
+            model: Plan,
+            as: 'plan',
+            attributes: ['title'],
+            where: {
+              id: plan_id,
+            },
+          },
+        ],
+      });
+
+      return newEnroll;
     });
 
     await Queue.add(EnrollStudentMail.key, {

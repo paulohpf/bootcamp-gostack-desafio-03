@@ -14,12 +14,12 @@ class UserController {
       },
       attributes: ['id', 'name', 'email'],
       limit: 10,
-      offset: (page - 1) * 20,
+      offset: (page - 1) * 10,
     });
 
     return res.json({
       searchText,
-      offset: (page - 1) * 20,
+      offset: (page - 1) * 10,
       totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
       rows: users,
     });

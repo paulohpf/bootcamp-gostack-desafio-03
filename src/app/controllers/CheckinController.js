@@ -17,18 +17,22 @@ class EnrollController {
     const { id } = req.params;
     const { page = 1 } = req.query;
 
-    const checkins = await Checkin.findAll({
+    const { count, rows: checkins } = await Checkin.findAndCountAll({
       where: {
         student_id: id,
       },
       attributes: ['id', 'created_at'],
-      order: ['created_at'],
-      limit: 20,
-      offset: (page - 1) * 20,
+      order: [['created_at', 'DESC']],
+      limit: 10,
+      offset: (page - 1) * 10,
       include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
     });
 
-    return res.json(checkins);
+    return res.json({
+      offset: (page - 1) * 10,
+      totalPages: Math.ceil(count / 10) !== 0 ? Math.ceil(count / 10) : 1,
+      rows: checkins,
+    });
   }
 
   async store(req, res) {
