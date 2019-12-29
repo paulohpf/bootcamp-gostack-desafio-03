@@ -63,7 +63,7 @@ class HelpOrderController {
         student_id: id,
       },
       attributes: ['id', 'question', 'answer', 'answer_at'],
-      order: ['created_at'],
+      order: [['created_at', 'DESC']],
       limit: 10,
       offset: (page - 1) * 10,
       include: [{ model: Student, as: 'student', attributes: ['id', 'name'] }],
