@@ -114,8 +114,6 @@ class HelpOrderController {
       limit: 1,
     });
 
-    console.log(currentEnroll);
-
     if (!currentEnroll)
       return res.status(400).json({ error: 'User is not enrolled' });
 

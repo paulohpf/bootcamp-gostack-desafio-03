@@ -121,7 +121,7 @@ class EnrollController {
         .status(400)
         .json({ error: 'the start date cannot be before the current date' });
 
-    // Verify existence of current registrations
+    // Verifica a existencia de outra matricula em andamento
     const currentEnroll = await Enroll.findOne({
       where: { student_id },
       attributes: ['id', 'start_date', 'end_date'],
